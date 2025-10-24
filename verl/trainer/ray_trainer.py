@@ -269,6 +269,7 @@ class RayPPOTrainer:
             system_prompt=self.config.data.system_prompt,
             min_pixels=self.config.data.min_pixels,
             max_pixels=self.config.data.max_pixels,
+            structured_prompt=self.config.data.structured_prompt,
         )
         # use sampler for better ckpt resume
         if self.config.data.shuffle:
@@ -300,6 +301,8 @@ class RayPPOTrainer:
             system_prompt=self.config.data.system_prompt,
             min_pixels=self.config.data.min_pixels,
             max_pixels=self.config.data.max_pixels,
+            # max_size=self.config.data.max_size, # control the max size of the val dataset
+            structured_prompt=self.config.data.structured_prompt,
         )
         self.val_dataloader = StatefulDataLoader(
             dataset=self.val_dataset,
@@ -546,6 +549,7 @@ class RayPPOTrainer:
             self.logger.log(data=val_metrics, step=self.global_step)
             if self.config.trainer.val_only:
                 return
+
 
         for _ in tqdm(range(self.config.trainer.total_episodes), desc="Episode", position=0):
             for batch_dict in tqdm(self.train_dataloader, desc="Running step", position=1):

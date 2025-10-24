@@ -55,6 +55,8 @@ def evaluate(args):
     # ======================================================================== #
 
     score_dict = defaultdict(int)
+    score_dict['overall'] = 0
+    score_dict['overall_full'] = 0
     for pred, gt in zip(prediction, ground_truth):
         category=gt['group']+'-'+gt['ui_type']
         gt_bbox=gt['gt_bbox']
@@ -62,6 +64,8 @@ def evaluate(args):
         score_dict[category+"_"+"full"] += 1
         if gt_bbox[0]<pred_x<gt_bbox[2] and gt_bbox[1]<pred_y<gt_bbox[3]:
             score_dict[category] += 1
+            score_dict['overall'] += 1
+        score_dict['overall_full'] += 1
 
 
     for key in [k for k in score_dict.keys() if not k.endswith("full")]:

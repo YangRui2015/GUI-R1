@@ -4,7 +4,6 @@ from tqdm import tqdm
 from transformers import AutoProcessor
 from vllm import LLM, SamplingParams
 from qwen_vl_utils import process_vision_info
-import ray
 import torch
 from torch.utils.data import Dataset, DataLoader
 import argparse
@@ -13,8 +12,19 @@ from datasets import load_dataset
 from datasets import Dataset as hf_dataset
 from PIL import Image
 from io import BytesIO
+import torch.multiprocessing as mp
+if mp.get_start_method(allow_none=True) != "spawn":
+    mp.set_start_method("spawn", force=True)
+import os
+os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = "spawn"
 # 初始化 Ray
+import ray
+from ray.util.queue import Queue
 ray.init()
+# ray.init(_system_config={
+#     "automatic_object_spilling_enabled": True,
+#     "object_spilling_config": '{"type":"filesystem","params":{"directory_path":"/tmp/ray_spill"}}',
+# })
 
 # 模型路径
 MODEL_PATH = ""
@@ -32,7 +42,7 @@ SAMPLING_PARAMS = SamplingParams(
 DATA_PATH = ""
 
 # 微批大小
-MICRO_BATCH = 24
+MICRO_BATCH = 64
 
 def extract_action(content):
     answer_tag_pattern = r'<answer>(.*?)</answer>'
@@ -186,6 +196,8 @@ class Worker:
         self.llm = LLM(
             model=model_path,
             limit_mm_per_prompt={"image": 1, "video": 1},
+            dtype="bfloat16",  
+            gpu_memory_utilization=0.85,
         )
         self.sampling_params = sampling_params
 
@@ -240,15 +252,30 @@ def main(args):
         data=load_dataset("parquet", data_files=DATA_PATH, split="train")
     else:
         data = [json.loads(s) for s in open(DATA_PATH, "r")] if DATA_PATH.endswith(".jsonl") else json.load(open(DATA_PATH,"r"))
+    print(f"Total samples: {len(data)}")
+
     # 输出路径
     OUTPUT_DIR = args.output_path
     num_actors = args.num_actor
-    OUTPUT_DIR = os.path.join(OUTPUT_DIR,MODEL_PATH.split('/')[-1])
+    # OUTPUT_DIR = os.path.join(OUTPUT_DIR,MODEL_PATH.split('/')[-1])
     NEW_FILE = os.path.join(OUTPUT_DIR, DATA_PATH.split("/")[-1].replace(".jsonl", "_pred.jsonl").replace('.parquet','.json'))
     print(NEW_FILE)
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     
-    data_chunks = [hf_dataset.from_dict(data[i::num_actors]) for i in range(num_actors)]
+
+    num_chunks = num_actors * 4
+    def split_into_chunks(data, num_chunks):
+        n = len(data)
+        chunk_size = (n + num_chunks - 1) // num_chunks  # 向上取整
+        chunks = []
+        for i in range(num_chunks):
+            start = i * chunk_size
+            end = min((i + 1) * chunk_size, n)
+            if start < end:  # 避免最后为空
+                chunks.append(hf_dataset.from_dict(data[start:end]))
+        return chunks
+    # 用法
+    data_chunks = split_into_chunks(data, num_chunks)
 
     # 加载处理器
     processor = AutoProcessor.from_pretrained(MODEL_PATH)
@@ -258,21 +285,34 @@ def main(args):
     # 创建 8 个 Actor，每个 Actor 分配到一个 GPU
     workers = [Worker.remote(MODEL_PATH, SAMPLING_PARAMS) for _ in range(num_actors)]
 
+    MAX_INFLIGHT = args.num_actor 
     # 使用 PyTorch Dataset 和 DataLoader
-    futures = []
-    for i, chunk in enumerate(data_chunks):
-        dataset = MultiModalDataset(chunk, processor)
-        dataloader = DataLoader(dataset, batch_size=MICRO_BATCH, shuffle=False, num_workers=4, collate_fn=custom_collate_fn)
-        futures.append(workers[i].process_data.remote(dataloader))
-
-    # 收集所有结果
-    all_results = ray.get(futures)
-
-    # 将结果写入文件
+    inflight = []
     with open(NEW_FILE, "w") as ans_file:
-        for worker_results in all_results:
+        for i, chunk in enumerate(data_chunks):
+            print(f"Processing chunk {i+1}/{len(data_chunks)} with {len(chunk)} samples")
+            dataset = MultiModalDataset(chunk, processor)
+            dataloader = DataLoader(dataset, batch_size=MICRO_BATCH, shuffle=False, num_workers=0, collate_fn=custom_collate_fn)
+            inflight.append(workers[i % num_actors].process_data.remote(dataloader))
+            if len(inflight) >= MAX_INFLIGHT:
+                done, inflight = ray.wait(inflight, num_returns=1)
+                results_list = ray.get(done)
+                for worker_results in results_list:          # 每个 done
+                    for sample in worker_results:            # 该 actor 返回的样本列表
+                        ans_file.write(json.dumps(sample, ensure_ascii=False) + "\n")
+                ans_file.flush()  # 可选：降低数据丢失风险
+                print(f"Completed {i+1}/{len(data_chunks)} chunks")
+            # del files to save memory
+            del dataset
+            del dataloader
+
+    # 清空剩余 inflight
+    if inflight:
+        results_list = ray.get(inflight)
+        for worker_results in results_list:
             for sample in worker_results:
-                ans_file.write(json.dumps(sample) + "\n")
+                ans_file.write(json.dumps(sample, ensure_ascii=False) + "\n")
+        ans_file.flush()
 
 
 if __name__ == "__main__":

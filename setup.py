@@ -27,10 +27,11 @@ def get_version() -> str:
 
 
 def get_requires() -> list[str]:
-    with open("requirements.txt", encoding="utf-8") as f:
-        file_content = f.read()
-        lines = [line.strip() for line in file_content.strip().split("\n") if not line.startswith("#")]
-        return lines
+    return []
+    # with open("requirements.txt", encoding="utf-8") as f:
+    #     file_content = f.read()
+    #     lines = [line.strip() for line in file_content.strip().split("\n") if not line.startswith("#")]
+    #     return lines
 
 
 extra_require = {

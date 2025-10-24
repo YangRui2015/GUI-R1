@@ -55,7 +55,11 @@ def evaluate(args):
     # ======================================================================== #
 
     score_dict = defaultdict(int)
+    action_counter = defaultdict(int)
+    gt_action_counter = defaultdict(int)
     for pred, gt in zip(prediction, ground_truth):
+        action_counter[pred['pred_action']] += 1
+        gt_action_counter[gt['gt_action']] += 1
         category=gt['group']+'-'+gt['gt_action']
         score_dict[category+"_"+"full"] += 1
         # cal for type and step
@@ -66,6 +70,11 @@ def evaluate(args):
             category=gt['group']+'-'+gt['gt_action']+'-'+'grounding'
             gt_bbox=gt['gt_bbox']
             pred_x,pred_y=pred['pred_coord'][:2]
+            if args.resize_prediction:
+                pred_x=pred_x / gt['image_size'][0] * gt['orig_w']
+                pred_y=pred_y / gt['image_size'][1] * gt['orig_h']
+                gt['image_size']=[gt['orig_w'],gt['orig_h']]
+
             score_dict[category+"_"+"full"] += 1
             if ((gt_bbox[0]-pred_x)/gt['image_size'][0])**2+((gt_bbox[1]-pred_y)/gt['image_size'][1])**2<0.14**2:
                 score_dict[category] += 1
@@ -76,6 +85,8 @@ def evaluate(args):
             score_dict[category+"_"+"full"] += 1
             if calculate_f1_score(gt_text,pred_text)>=0.5:
                 score_dict[category] += 1
+    
+    breakpoint()
     full_type=0
     full_step=0
     full_gr=0
@@ -95,6 +106,7 @@ def evaluate(args):
             full_type_hit+=score_dict[key]
             full_type+=score_dict[key+'_full']
         logger.info(f"Type {key} Length {score_dict[key+'_full']} : {(score_dict[key] / score_dict[key+'_full'])}")
+
     logger.info(f"ALL Type : {(full_type_hit / full_type)}")
     logger.info(f"ALL Step : {(full_step_hit / full_step)}")
     logger.info(f"ALL GR : {(full_gr_hit / full_gr)}")
@@ -106,6 +118,7 @@ if __name__ == '__main__':
     parser.add_argument('--datasets', type=str, default='')
     parser.add_argument('--output_path', type=str, default='./outputs/score/')
     parser.add_argument('--seed', type=int, default=0)
+    parser.add_argument('--resize_prediction', action='store_true')
     args = parser.parse_args()
 
     if not os.path.exists(args.output_path):

@@ -1,0 +1,212 @@
+################/projects/illinois/eng/ece/huanz/ry21/GUI-R1/saved_cpts/qwen2_5_vl_3b_guir1_grpo_1080p_4gpu/global_step_55/actor/huggingface
+################screenspot_pro_test.json
+################/projects/illinois/eng/ece/huanz/ry21/GUI-R1/saved_cpts/qwen2_5_vl_3b_guir1_grpo_1080p_4gpu/global_step_55/actor/huggingface
+################screenspot_pro_test.json
+Type CAD-text : 0.28426395939086296
+Type Creative-text : 0.3383838383838384
+Type Scientific-icon : 0.12727272727272726
+Type Scientific-text : 0.3194444444444444
+Type OS-text : 0.32710280373831774
+Type Office-icon : 0.09433962264150944
+Type Office-text : 0.576271186440678
+Type CAD-icon : 0.03125
+Type OS-icon : 0.07865168539325842
+Type Dev-text : 0.2792207792207792
+Type Dev-icon : 0.034482758620689655
+Type Creative-icon : 0.04195804195804196
+################/projects/illinois/eng/ece/huanz/ry21/GUI-R1/saved_cpts/qwen2_5_vl_3b_guir1_grpo_1080p_4gpu/global_step_55/actor/huggingface
+################screenspot_pro_test.json
+Type overall : 0.24541429475015814
+Type CAD-text : 0.28426395939086296
+Type Creative-text : 0.3383838383838384
+Type Scientific-icon : 0.12727272727272726
+Type Scientific-text : 0.3194444444444444
+Type OS-text : 0.32710280373831774
+Type Office-icon : 0.09433962264150944
+Type Office-text : 0.576271186440678
+Type CAD-icon : 0.03125
+Type OS-icon : 0.07865168539325842
+Type Dev-text : 0.2792207792207792
+Type Dev-icon : 0.034482758620689655
+Type Creative-icon : 0.04195804195804196
+################/projects/illinois/eng/ece/huanz/ry21/GUI-R1/saved_cpts/qwen2_5_vl_3b_guir1_grpo_1080p_4gpu/global_step_55/actor/huggingface
+################screenspot_test.json
+Type overall : 0.8254716981132075
+Type desktop-text : 0.9536082474226805
+Type desktop-icon : 0.6
+Type mobile-text : 0.9853479853479854
+Type mobile-icon : 0.7510917030567685
+Type web-text : 0.8652173913043478
+Type web-icon : 0.6844660194174758
+################/projects/illinois/eng/ece/huanz/ry21/GUI-R1/saved_cpts/qwen2_5_vl_7b_guir1_grpo_1080p_4gpu/global_step_155
+################androidcontrol_high_test.json
+################/projects/illinois/eng/ece/huanz/ry21/GUI-R1/saved_cpts/qwen2_5_vl_7b_guir1_grpo_1080p_4gpu/global_step_155
+################androidcontrol_high_test.json
+################/projects/illinois/eng/ece/huanz/ry21/GUI-R1/saved_cpts/qwen2_5_vl_7b_guir1_grpo_1080p_4gpu/global_step_155
+################androidcontrol_high_test.json
+Type android-click Length 608 : 0.9226973684210527
+Type android-click-grounding Length 608 : 0.6726973684210527
+Type android-open_app Length 67 : 0.40298507462686567
+Type android-open_app-text Length 67 : 0.29850746268656714
+Type android-type Length 85 : 0.8352941176470589
+Type android-type-text Length 85 : 0.6588235294117647
+Type android-scroll Length 137 : 0.5401459854014599
+Type android-wait Length 55 : 0.4909090909090909
+Type android-long_press Length 1 : 1.0
+Type android-long_press-grounding Length 1 : 1.0
+Type android-press_back Length 44 : 0.11363636363636363
+Type android-scroll-text Length 137 : 0.0364963503649635
+ALL Type : 0.7683049147442327
+ALL Step : 0.5467706013363028
+ALL GR : 0.6732348111658456
+################/projects/illinois/eng/ece/huanz/ry21/GUI-R1/saved_cpts/qwen2_5_vl_7b_guir1_grpo_1080p_4gpu/global_step_155
+################androidcontrol_high_test.json
+Type android-click Length 608 : 0.9226973684210527
+Type android-click-grounding Length 608 : 0.6726973684210527
+Type android-open_app Length 67 : 0.40298507462686567
+Type android-open_app-text Length 67 : 0.29850746268656714
+Type android-type Length 85 : 0.8352941176470589
+Type android-type-text Length 85 : 0.6588235294117647
+Type android-scroll Length 137 : 0.5401459854014599
+Type android-wait Length 55 : 0.4909090909090909
+Type android-long_press Length 1 : 1.0
+Type android-long_press-grounding Length 1 : 1.0
+Type android-press_back Length 44 : 0.11363636363636363
+Type android-scroll-text Length 137 : 0.0364963503649635
+ALL Type : 0.7683049147442327
+ALL Step : 0.5467706013363028
+ALL GR : 0.6732348111658456
+################/projects/illinois/eng/ece/huanz/ry21/GUI-R1/saved_cpts/qwen2_5_vl_7b_guir1_grpo_1080p_4gpu/global_step_155
+################androidcontrol_high_test.json
+Type android-click Length 4528 : 0.9207155477031802
+Type android-click-grounding Length 4528 : 0.6844081272084805
+Type android-open_app Length 543 : 0.3812154696132597
+Type android-open_app-text Length 543 : 0.32044198895027626
+Type android-type Length 561 : 0.9215686274509803
+Type android-type-text Length 561 : 0.7290552584670231
+Type android-scroll Length 1131 : 0.5305039787798409
+Type android-wait Length 515 : 0.5106796116504855
+Type android-long_press Length 7 : 0.2857142857142857
+Type android-long_press-grounding Length 7 : 0.7142857142857143
+Type android-press_back Length 313 : 0.0670926517571885
+Type android-scroll-text Length 1131 : 0.04332449160035367
+ALL Type : 0.7605948933929981
+ALL Step : 0.5518463810930576
+ALL GR : 0.6844542447629548
+################/projects/illinois/eng/ece/huanz/ry21/GUI-R1/saved_cpts/qwen2_5_vl_7b_guir1_grpo_1080p_4gpu/global_step_155
+################androidcontrol_low_test.json
+Type android-click Length 2465 : 0.9906693711967546
+Type android-click-grounding Length 2465 : 0.8365111561866125
+Type android-wait Length 257 : 0.3035019455252918
+Type android-type-text Length 308 : 0.7922077922077922
+Type android-long_press Length 3 : 1.0
+Type android-long_press-grounding Length 3 : 0.6666666666666666
+Type android-type Length 308 : 0.8636363636363636
+Type android-scroll Length 542 : 0.9575645756457565
+Type android-press_back Length 184 : 0.4891304347826087
+Type android-scroll-text Length 542 : 0.16605166051660517
+Type android-open_app Length 293 : 0.17406143344709898
+Type android-open_app-text Length 293 : 0.10238907849829351
+ALL Type : 0.8511846001974334
+ALL Step : 0.6723899196898366
+ALL GR : 0.8363047001620746
+################/projects/illinois/eng/ece/huanz/ry21/GUI-R1/saved_cpts/qwen2_5_vl_7b_guir1_grpo_1080p_4gpu/global_step_155
+################androidcontrol_low_test.json
+Type android-scroll Length 1124 : 0.9555160142348754
+Type android-click Length 4527 : 0.9922686105588691
+Type android-type Length 558 : 0.8422939068100358
+Type android-type-text Length 558 : 0.7903225806451613
+Type android-click-grounding Length 4527 : 0.8416169648774022
+Type android-press_back Length 312 : 0.5288461538461539
+Type android-scroll-text Length 1124 : 0.1895017793594306
+Type android-long_press Length 7 : 0.7142857142857143
+Type android-long_press-grounding Length 7 : 0.5714285714285714
+Type android-open_app Length 542 : 0.2047970479704797
+Type android-open_app-text Length 542 : 0.13468634686346864
+Type android-wait Length 509 : 0.2966601178781925
+ALL Type : 0.8534107402031931
+ALL Step : 0.6719443622373483
+ALL GR : 0.8411998235553595
+################/projects/illinois/eng/ece/huanz/ry21/GUI-R1/saved_cpts/qwen2_5_vl_3b_guir1_grpo_1080p_4gpu/qwen2_5_vl_3b_guir1_grpo_1080p_4gpu_cpt55
+################androidcontrol_low_test.json
+################/projects/illinois/eng/ece/huanz/ry21/GUI-R1/saved_cpts/qwen2_5_vl_3b_guir1_grpo_1080p_4gpu/qwen2_5_vl_3b_guir1_grpo_1080p_4gpu_cpt55
+################androidcontrol_low_test.json
+################/projects/illinois/eng/ece/huanz/ry21/GUI-R1/saved_cpts/qwen2_5_vl_3b_guir1_grpo_1080p_4gpu/qwen2_5_vl_3b_guir1_grpo_1080p_4gpu_cpt55
+################androidcontrol_low_test.json
+################/projects/illinois/eng/ece/huanz/ry21/GUI-R1/saved_cpts/qwen2_5_vl_3b_guir1_grpo_1080p_4gpu/qwen2_5_vl_3b_guir1_grpo_1080p_4gpu_cpt55
+################androidcontrol_low_test.json
+################/projects/illinois/eng/ece/huanz/ry21/GUI-R1/saved_cpts/qwen2_5_vl_3b_guir1_grpo_1080p_4gpu/qwen2_5_vl_3b_guir1_grpo_1080p_4gpu_cpt55
+################androidcontrol_low_test.json
+Type android-press_back Length 308 : 0.36038961038961037
+Type android-type Length 559 : 0.9320214669051878
+Type android-click Length 4538 : 0.9665050683120318
+Type android-click-grounding Length 4538 : 0.8034376377258704
+Type android-type-text Length 559 : 0.7567084078711985
+Type android-wait Length 514 : 0.20233463035019456
+Type android-open_app Length 549 : 0.17122040072859745
+Type android-scroll Length 1122 : 0.910873440285205
+Type android-scroll-text Length 1122 : 0.08021390374331551
+Type android-long_press Length 7 : 0.8571428571428571
+Type android-long_press-grounding Length 7 : 0.5714285714285714
+Type android-open_app-text Length 549 : 0.01092896174863388
+ALL Type : 0.8219033829143083
+ALL Step : 0.615350553505535
+ALL GR : 0.8030803080308031
+################/projects/illinois/eng/ece/huanz/ry21/GUI-R1/saved_cpts/qwen2_5_vl_3b_guir1_grpo_1080p_4gpu/qwen2_5_vl_3b_guir1_grpo_1080p_4gpu_cpt55
+################androidcontrol_high_test.json
+Type android-click Length 4547 : 0.8223004178579283
+Type android-type Length 563 : 0.7761989342806395
+Type android-click-grounding Length 4547 : 0.6208489113701342
+Type android-open_app Length 549 : 0.30965391621129323
+Type android-type-text Length 563 : 0.5630550621669627
+Type android-wait Length 520 : 0.551923076923077
+Type android-scroll Length 1111 : 0.2376237623762376
+Type android-scroll-text Length 1111 : 0.023402340234023402
+Type android-long_press-grounding Length 7 : 0.42857142857142855
+Type android-press_back Length 307 : 0.1498371335504886
+Type android-long_press Length 7 : 0.14285714285714285
+Type android-open_app-text Length 549 : 0.0018214936247723133
+ALL Type : 0.6501841136244082
+ALL Step : 0.4677585952486351
+ALL GR : 0.6205533596837944
+################/projects/illinois/eng/ece/huanz/ry21/GUI-R1/saved_cpts/qwen2_5_vl_3b_guir1_grpo_1080p_4gpu/qwen2_5_vl_3b_guir1_grpo_1080p_4gpu_cpt55
+################androidcontrol_low_test.json
+Type android-press_back Length 308 : 0.36038961038961037
+Type android-type Length 559 : 0.9320214669051878
+Type android-click Length 4538 : 0.9665050683120318
+Type android-click-grounding Length 4538 : 0.8034376377258704
+Type android-type-text Length 559 : 0.7567084078711985
+Type android-wait Length 514 : 0.20233463035019456
+Type android-open_app Length 549 : 0.17122040072859745
+Type android-scroll Length 1122 : 0.910873440285205
+Type android-scroll-text Length 1122 : 0.08021390374331551
+Type android-long_press Length 7 : 0.8571428571428571
+Type android-long_press-grounding Length 7 : 0.5714285714285714
+Type android-open_app-text Length 549 : 0.01092896174863388
+ALL Type : 0.8219033829143083
+ALL Step : 0.615350553505535
+ALL GR : 0.8030803080308031
+################/projects/illinois/eng/ece/huanz/ry21/GUI-R1/saved_cpts/qwen2_5_vl_3b_guir1_grpo_1080p_4gpu/qwen2_5_vl_3b_guir1_grpo_1080p_4gpu_cpt55
+################screenspot_pro_test.json
+Type overall : 0.2422517394054396
+Type CAD-text : 0.28426395939086296
+Type Creative-text : 0.3282828282828283
+Type Scientific-icon : 0.12727272727272726
+Type Scientific-text : 0.3194444444444444
+Type OS-text : 0.32710280373831774
+Type Office-icon : 0.09433962264150944
+Type Office-text : 0.5706214689265536
+Type CAD-icon : 0.03125
+Type OS-icon : 0.06741573033707865
+Type Dev-text : 0.2727272727272727
+Type Dev-icon : 0.034482758620689655
+Type Creative-icon : 0.04195804195804196
+################/projects/illinois/eng/ece/huanz/ry21/GUI-R1/saved_cpts/qwen2_5_vl_3b_guir1_grpo_1080p_4gpu/qwen2_5_vl_3b_guir1_grpo_1080p_4gpu_cpt55
+################screenspot_test.json
+Type overall : 0.8231132075471698
+Type desktop-text : 0.9536082474226805
+Type desktop-icon : 0.5857142857142857
+Type mobile-text : 0.9853479853479854
+Type mobile-icon : 0.7467248908296943
+Type web-text : 0.8652173913043478
+Type web-icon : 0.6844660194174758

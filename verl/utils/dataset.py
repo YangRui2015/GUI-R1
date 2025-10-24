@@ -88,6 +88,8 @@ class RLHFDataset(Dataset):
         system_prompt: str = None,
         max_pixels: int = None,
         min_pixels: int = None,
+        max_size: int = None,
+        structured_prompt: bool = False,
     ):
         self.tokenizer = tokenizer
         self.processor = processor
@@ -99,6 +101,8 @@ class RLHFDataset(Dataset):
         self.system_prompt = system_prompt
         self.max_pixels = max_pixels
         self.min_pixels = min_pixels
+        self.max_size = max_size
+        self.structured_prompt = structured_prompt
 
         if "@" in data_path:
             data_path, data_split = data_path.split("@")
@@ -112,6 +116,9 @@ class RLHFDataset(Dataset):
             self.dataset = load_dataset("parquet", data_files=data_path, split="train")
         else:  # remote dataset
             self.dataset = load_dataset(data_path, split=data_split)
+        
+        if max_size is not None and len(self.dataset) > max_size:
+            self.dataset = self.dataset.select(range(max_size))
 
     def __len__(self):
         return len(self.dataset)
@@ -128,7 +135,19 @@ class RLHFDataset(Dataset):
         row_dict.pop('scale', None)
         images=[row_dict['image']]
       
-        if task_type=='high':
+        if self.structured_prompt:
+            prompt_str= f'''You are a reasoning GUI Agent Assistant. In this UI screenshot <image>, I want you to continue executing the command '{text}', with the action history being '{history}'.
+            The response should be structured in the following format:
+            <think> Your step-by-step thought process here... </think>
+            <answer>
+            {{
+                "action_type": "the type of action to perform, e.g., click, type, select, scroll, complete, close/delete, press_home, press_back, enter",
+                "action_target": "the description of the target of the action, such as the color, text, or position on the screen o f the UI element to interact with",
+                "value": "the input text or direction ('up', 'down', 'left', 'right') for the action, if applicable; otherwise, use 'no input text'"
+            }}
+            </answer>
+            '''
+        elif task_type=='high':
             prompt_str=  (
                 f"You are GUI-R1, a reasoning GUI Agent Assistant. In this UI screenshot <image>, I want you to continue executing the command '{text}', with the action history being '{history}'.\n"
                 "Please provide the action to perform (enumerate from ['complete', 'close/delete', 'press_home', 'click', 'press_back', 'type', 'select', 'scroll', 'enter']), the point where the cursor is moved to (integer) if a click is performed, and any input text required to complete the action.\n"
@@ -160,7 +179,7 @@ class RLHFDataset(Dataset):
             gt_bbox[2]*=scalex
             gt_bbox[3]*=scaley
 
-        gt={'action': row_dict['gt_action'],'gt_bbox': gt_bbox,'input_text': row_dict['gt_input_text']}
+        gt={'action': row_dict['gt_action'],'gt_bbox': gt_bbox,'input_text': row_dict['gt_input_text'], 'scale': [scalex,scaley]}
         # if self.system_prompt:
         #     messages.insert(0, {"role": "system", "content": self.system_prompt})
 

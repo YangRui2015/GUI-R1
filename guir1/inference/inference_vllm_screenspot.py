@@ -4,7 +4,6 @@ from tqdm import tqdm
 from transformers import AutoProcessor
 from vllm import LLM, SamplingParams
 from qwen_vl_utils import process_vision_info
-import ray
 import torch
 from torch.utils.data import Dataset, DataLoader
 import argparse
@@ -13,7 +12,13 @@ from PIL import Image
 from io import BytesIO
 from datasets import load_dataset
 from datasets import Dataset as hf_dataset
+import torch.multiprocessing as mp
+if mp.get_start_method(allow_none=True) != "spawn":
+    mp.set_start_method("spawn", force=True)
+import os
+os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = "spawn"
 # 初始化 Ray
+import ray
 ray.init()
 
 # 模型路径
@@ -32,7 +37,7 @@ SAMPLING_PARAMS = SamplingParams(
 DATA_PATH = ""
 
 # 微批大小
-MICRO_BATCH = 6
+MICRO_BATCH = 64
 
 def extract_coord(content):
     # Try to find the bbox within <answer> tags, if can not find, return [0, 0, 0, 0]
@@ -60,7 +65,7 @@ class MultiModalDataset(Dataset):
     def __init__(self, data, processor):
         self.data = data
         self.processor = processor
-        self.processor.max_pixels=2097152
+        self.processor.max_pixels=2109744
 
     def __len__(self):
         return len(self.data)
@@ -210,8 +215,8 @@ def main(args):
         data = [json.loads(s) for s in open(DATA_PATH, "r")] if DATA_PATH.endswith(".jsonl") else json.load(open(DATA_PATH,"r"))
     # 输出路径
     OUTPUT_DIR = args.output_path
-    num_actors = args.num_actor
-    OUTPUT_DIR = os.path.join(OUTPUT_DIR,MODEL_PATH.split('/')[-1])
+    num_actors = args.num_gpus
+    # OUTPUT_DIR = os.path.join(OUTPUT_DIR,MODEL_PATH.split('/')[-1])
     NEW_FILE = os.path.join(OUTPUT_DIR, DATA_PATH.split("/")[-1].replace(".jsonl", "_pred.jsonl").replace('.parquet','.json'))
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     data_chunks = [hf_dataset.from_dict(data[i::num_actors]) for i in range(num_actors)]
@@ -229,7 +234,7 @@ def main(args):
     futures = []
     for i, chunk in enumerate(data_chunks):
         dataset = MultiModalDataset(chunk, processor)
-        dataloader = DataLoader(dataset, batch_size=MICRO_BATCH, shuffle=False, num_workers=4, collate_fn=custom_collate_fn)
+        dataloader = DataLoader(dataset, batch_size=MICRO_BATCH, shuffle=False, num_workers=1, collate_fn=custom_collate_fn)
         futures.append(workers[i].process_data.remote(dataloader))
 
     # 收集所有结果
@@ -247,6 +252,6 @@ if __name__ == "__main__":
     parser.add_argument('--model_path', type=str, default='<model_path>')
     parser.add_argument('--data_path', type=str, default="<data_path>")
     parser.add_argument('--output_path', type=str, default='./outputs')
-    parser.add_argument('--num_actor', type=int, default=8)
+    parser.add_argument('--num_gpus', type=int, default=8)
     args = parser.parse_args()
     main(args)

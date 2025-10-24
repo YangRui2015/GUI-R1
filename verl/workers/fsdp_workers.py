@@ -30,6 +30,7 @@ from transformers import (
     AutoConfig,
     AutoModelForCausalLM,
     AutoModelForTokenClassification,
+    Qwen2_5_VLForConditionalGeneration,
     AutoModelForVision2Seq,
     GenerationConfig,
     PreTrainedModel,
@@ -186,10 +187,13 @@ class FSDPWorker(Worker):
 
         if self._is_critic:
             auto_class = AutoModelForTokenClassification
+        # elif type(self.model_config) == Qwen2_5_VLForConditionalGeneration.config_class:
+        #     auto_class = Qwen2_5_VLForConditionalGeneration
         elif type(self.model_config) in AutoModelForVision2Seq._model_mapping.keys():
             auto_class = AutoModelForVision2Seq
         else:
             auto_class = AutoModelForCausalLM
+        print(f"Using model class: {auto_class}")
 
         if (not fsdp_config.enable_rank0_init) or self.device_mesh.get_local_rank("fsdp") == 0:
             model = auto_class.from_pretrained(
