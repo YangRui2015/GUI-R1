@@ -24,6 +24,14 @@ _ACTION_RE = re.compile(r'"action_type":\s*"(.*?)"')
 _INPUT_TEXT_RE = re.compile(r'"value":\s*"(.*?)"')
 _TARGET_RE = re.compile(r'"action_target":\s*"(.*?)"')
 
+writer = open("r1gui_grounders_planner_val.log", "a", buffering=1, encoding="utf-8")
+writer_lock = asyncio.Lock()
+
+def _safe_sync_log(line: str):
+    writer.write(line + ("\n" if not line.endswith("\n") else ""))
+    writer.flush()  # 立刻落盘
+
+
 
 class UgRouter:
     def __init__(self, clients):
@@ -227,11 +235,45 @@ async def r1gui_accuracy_reward(predict_str: str, ground_truth: str, image_bytes
 
         pred_action=extract_action(predict_str).lower()
         pred_input_text=extract_input_text(predict_str).lower()
-        # image = Image.open(BytesIO(image_bytes["bytes"])) 
+        # map actions
+        action_map = {
+            'longpress': 'long_press',
+            'openapp': 'open_app',
+            'write': 'type',
+            'back': 'press_back'
+        }
+        if pred_action in action_map:
+            pred_action = action_map[pred_action]
+        if pred_action == 'scroll' and pred_input_text not in ['up', 'down', 'left', 'right']:
+            if ' down ' in predict_str.lower():
+                pred_input_text = 'down'
+            elif ' up ' in predict_str.lower():
+                pred_input_text = 'up'
+            elif ' left ' in predict_str.lower():
+                pred_input_text = 'left'
+            elif ' right ' in predict_str.lower():
+                pred_input_text = 'right'
+            else:
+                pred_input_text = 'down'  # default to down if not specified
+        elif pred_action == 'swipe' and pred_input_text not in ['up', 'down', 'left', 'right']:
+            pred_action = 'scroll'
+            if ' down ' in predict_str.lower():
+                pred_input_text = 'up'
+            elif ' up ' in predict_str.lower():
+                pred_input_text = 'down'
+            elif ' left ' in predict_str.lower():
+                pred_input_text = 'right'
+            elif ' right ' in predict_str.lower():
+                pred_input_text = 'left'
+            else:
+                pred_input_text = 'up'  # default to down if not specified
+
 
         if pred_action!=gt_action:
-            if random.random()<0.02:
-                print(f"Action mismatch: pred_action: {pred_action}, gt_action: {gt_action}")
+            if random.random()<0.05:
+                async with writer_lock:
+                    writer.write(f"Action mismatch: pred_action: {pred_action}, gt_action: {gt_action}, reward: 0.0\n")
+                    writer.flush()
             return 0.0
 
         if gt_action in ['click']: # type? 'select'
@@ -240,31 +282,34 @@ async def r1gui_accuracy_reward(predict_str: str, ground_truth: str, image_bytes
         else:
             pred_bbox = [-1.0, -1.0]  
 
-        if random.random()<0.02:
-            print(f"pred_action: {pred_action}, gt_action: {gt_action}, pred_bbox: {pred_bbox}, gt_bbox: {gt_bbox}, pred_input_text: {pred_input_text}, gt_input_text: {gt_input_text}")
-        
-        
+        reward = 0.0
         if gt_action in ["click"]:
             if len(gt_bbox)==2:
                 if (pred_bbox[0]-gt_bbox[0])**2+(pred_bbox[1]-gt_bbox[1])**2<0.14**2:
-                    return 1.0
+                    reward = 1.0
                 else:
-                    return 0.0
+                    reward = 0.0
             elif len(gt_bbox)==4:
                 if (gt_bbox[0]<pred_bbox[0]<gt_bbox[2]) and (gt_bbox[1]<pred_bbox[1]<gt_bbox[3]):
-                    return 1.0
+                    reward = 1.0
                 else:
-                    return 0.0
+                    reward = 0.0
             else:
-                return 0.0
+                reward = 0.0
         elif gt_action in ['type', 'select','scroll']:
             if calculate_f1_score(pred_input_text,gt_input_text)>=0.5:
-                return 1.0
+                reward = 1.0
             else:
-                return 0.0
+                reward = 0.0
         else:
-            return 1.0
+            reward = 1.0
 
+        if random.random()<0.05:
+            async with writer_lock:
+                writer.write(f"pred_action: {pred_action}, gt_action: {gt_action}, pred_bbox: {pred_bbox}, gt_bbox: {gt_bbox}, pred_input_text: {pred_input_text}, gt_input_text: {gt_input_text}, reward: {reward}\n")
+                writer.flush()
+
+        return reward
     except Exception as e:
         print(f"Error in accuracy reward calculation: {e}")
         return 0.0

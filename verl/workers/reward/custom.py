@@ -111,6 +111,7 @@ class CustomRewardManager:
                     for i in range(B)
                 ])
             scores = _run_async(_score_sync_all())   # <-- no 'await' in sync function
+            
 
         # ---- 回填 ----
         for i, sc in enumerate(scores):

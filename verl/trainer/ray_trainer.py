@@ -24,7 +24,8 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 from enum import Enum, IntEnum, auto
 from typing import Any, Callable, Dict, List, Optional, Type
-
+import json
+from pathlib import Path
 import numpy as np
 import ray
 import torch
@@ -347,6 +348,32 @@ class RayPPOTrainer:
         samples = samples[: self.config.trainer.val_generations_to_log]
         self.logger.log_generation(samples, self.global_step)
 
+    def _log_val_samples_to_disk(self, inputs: List[str], outputs: List[str], scores: List[float]) -> str:
+        """
+        Persist all validation samples (prompt, output, reward) for offline inspection.
+        Returns the saved file path.
+        """
+        # Choose a stable base dir: reuse the checkpoint path for convenience
+        base_dir = Path(self.config.trainer.save_checkpoint_path) 
+        out_dir = base_dir / "val_samples" 
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+        # One file per validation call, keyed by global_step
+        filename = out_dir / f"step{self.global_step}.jsonl"
+
+        with filename.open("w", encoding="utf-8") as f:
+            for prompt, output, reward in zip(inputs, outputs, scores):
+                rec = {
+                    "step": self.global_step,
+                    "prompt": prompt,
+                    "output": output,
+                    "reward": float(reward),
+                }
+                f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+
+        return str(filename)
+
+
     def _validate(self) -> Dict[str, Any]:
         reward_tensor_lst = []
         # Lists to collect samples for the table
@@ -395,6 +422,9 @@ class RayPPOTrainer:
                 reward_metrics_lst[key].extend(value)
 
         self._maybe_log_val_generations(inputs=sample_inputs, outputs=sample_outputs, scores=sample_scores)
+        if self.global_step % (self.config.trainer.val_freq * 4) == 0:
+            self._log_val_samples_to_disk(inputs=sample_inputs, outputs=sample_outputs, scores=sample_scores)
+
         reward_score = torch.cat(reward_tensor_lst, dim=0).sum(-1).mean().item()
         val_reward_metrics = {f"val/{key}_reward": value for key, value in reduce_metrics(reward_metrics_lst).items()}
         return {"val/reward_score": reward_score, **val_reward_metrics}

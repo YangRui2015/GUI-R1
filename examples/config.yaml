@@ -49,7 +49,7 @@ worker:
 
   rollout:
     temperature: 1.0
-    n: 8 # 5
+    n: 7 # 5
     gpu_memory_utilization: 0.7
     enforce_eager: false
     enable_chunked_prefill: false
@@ -81,7 +81,7 @@ trainer:
   val_freq: 5  # -1 to disable
   val_before_train: true
   val_only: false
-  val_generations_to_log: 1
+  val_generations_to_log: 20
   save_freq: 10  # -1 to disable
   save_limit: 3  # -1 to disable
   save_checkpoint_path: null

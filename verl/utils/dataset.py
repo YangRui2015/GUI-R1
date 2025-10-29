@@ -136,12 +136,13 @@ class RLHFDataset(Dataset):
         images=[row_dict['image']]
       
         if self.structured_prompt:
-            prompt_str= f'''You are a reasoning GUI Agent Assistant. In this UI screenshot <image>, I want you to continue executing the command '{text}', with the action history being '{history}'.
+            system_prompt = "You are a GUI agent. You are given a task and a screenshot of the screen. You need to perform a series of actions to complete the task. Available actions include 'Click', 'Write', 'Scroll', 'Back', 'LongPress', 'Wait', and 'OpenAPP'."
+            prompt_str = f'''Please generate the next move according to the UI screenshot <image>, instruction and previous actions.\n\nInstruction: {text}\n\nInteraction History: {history}\n
             The response should be structured in the following format:
             <think> Your step-by-step thought process here... </think>
             <answer>
             {{
-                "action_type": "the type of action to perform, e.g., click, type, select, scroll, complete, close/delete, press_home, press_back, enter",
+                "action_type": "the type of action to perform, e.g., Click, Write, Scroll, Back, LongPress, Wait, and OpenAPP",
                 "action_target": "the description of the target of the action, such as the color, text, or position on the screen o f the UI element to interact with",
                 "value": "the input text or direction ('up', 'down', 'left', 'right') for the action, if applicable; otherwise, use 'no input text'"
             }}
@@ -150,15 +151,27 @@ class RLHFDataset(Dataset):
         elif task_type=='high':
             prompt_str=  (
                 f"You are GUI-R1, a reasoning GUI Agent Assistant. In this UI screenshot <image>, I want you to continue executing the command '{text}', with the action history being '{history}'.\n"
-                "Please provide the action to perform (enumerate from ['complete', 'close/delete', 'press_home', 'click', 'press_back', 'type', 'select', 'scroll', 'enter']), the point where the cursor is moved to (integer) if a click is performed, and any input text required to complete the action.\n"
+                "Please provide the action to perform (enumerate from ['complete', 'press_home', 'click', 'press_back', 'type', 'wait', 'scroll', 'long_press', 'open_app']), the point where the cursor is moved to (integer) if a click is performed, and any input text required to complete the action.\n"
                 "Output the thinking process in <think> </think> tags, and the final answer in <answer> </answer> tags as follows:\n"
-                "<think> ... </think> <answer>[{'action': enum['complete', 'close/delete', 'press_home', 'click', 'press_back', 'type', 'select', 'scroll', 'enter'], 'point': [x, y], 'input_text': 'no input text [default]'}]</answer>\n"
-                "Note:\n specific input text (no default) is necessary for actions enum['type', 'select', 'scroll'] \n Example:\n"
-                "[{'action': enum['complete', 'close/delete', 'press_home', 'press_back', 'enter'], 'point': [-100, -100], 'input_text': 'no input text'}]\n"
-                "[{'action': enum['click'], 'point': [123, 300], 'input_text': 'no input text'}]\n"
-                "[{'action': enum['type', 'select'], 'point': [-100, -100], 'input_text': 'shanghai shopping mall'}]\n"
+                "<think> ... </think> <answer>[{'action': enum['complete', 'press_home', 'click', 'press_back', 'type', 'scroll', 'long_press', 'open_app', 'wait'], 'point': [x, y], 'input_text': 'no input text [default]'}]</answer>\n"
+                "Note:\n specific input text (no default) is necessary for actions enum['type', 'scroll'] \n Example:\n"
+                "[{'action': enum['complete', 'press_home', 'press_back', 'wait'], 'point': [-100, -100], 'input_text': 'no input text'}]\n"
+                "[{'action': enum['click', 'long_press'], 'point': [123, 300], 'input_text': 'no input text'}]\n"
+                "[{'action': enum['type'], 'point': [-100, -100], 'input_text': 'shanghai shopping mall'}]\n"
+                "[{'action': enum['open_app'], 'point': [-100, -100], 'input_text': 'the app name to open'}]\n"
                 "[{'action': enum['scroll'], 'point': [-100, -100], 'input_text': enum['up', 'left', 'right', 'down']}]"
             )
+            # prompt_str=  (
+            #     f"You are GUI-R1, a reasoning GUI Agent Assistant. In this UI screenshot <image>, I want you to continue executing the command '{text}', with the action history being '{history}'.\n"
+            #     "Please provide the action to perform (enumerate from ['complete', 'close/delete', 'press_home', 'click', 'press_back', 'type', 'select', 'scroll', 'enter']), the point where the cursor is moved to (integer) if a click is performed, and any input text required to complete the action.\n"
+            #     "Output the thinking process in <think> </think> tags, and the final answer in <answer> </answer> tags as follows:\n"
+            #     "<think> ... </think> <answer>[{'action': enum['complete', 'close/delete', 'press_home', 'click', 'press_back', 'type', 'select', 'scroll', 'enter'], 'point': [x, y], 'input_text': 'no input text [default]'}]</answer>\n"
+            #     "Note:\n specific input text (no default) is necessary for actions enum['type', 'select', 'scroll'] \n Example:\n"
+            #     "[{'action': enum['complete', 'close/delete', 'press_home', 'press_back', 'enter'], 'point': [-100, -100], 'input_text': 'no input text'}]\n"
+            #     "[{'action': enum['click'], 'point': [123, 300], 'input_text': 'no input text'}]\n"
+            #     "[{'action': enum['type', 'select'], 'point': [-100, -100], 'input_text': 'shanghai shopping mall'}]\n"
+            #     "[{'action': enum['scroll'], 'point': [-100, -100], 'input_text': enum['up', 'left', 'right', 'down']}]"
+            # )
         else:
             prompt_str=(
                 f"You are GUI-R1, a reasoning GUI Agent Assistant. In this UI screenshot <image>, I want you to continue executing the command '{text}', with the action history being '{history}'.\n"
@@ -168,7 +181,14 @@ class RLHFDataset(Dataset):
                 "Example:\n"
                 "[{'action': enum['click'], 'point': [123, 300], 'input_text': 'no input text'}]\n"
             )
-        messages = [{"role": "user", "content": prompt_str}]
+
+        if self.system_prompt:
+            messages = [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": prompt_str},
+            ]
+        else:
+            messages = [{"role": "user", "content": prompt_str}]
         images=[process_image(image, self.max_pixels, self.min_pixels) for image in images]
 
         scalex,scaley=images[0].size
